@@ -1,1 +1,42 @@
+import streamlit as st
+import tensorflow as tf
+import numpy as np
+from PIL import Image
+
+# Load the trained CNN model
+model = tf.keras.models.load_model('path_to_your_trained_model.h5')
+
+# Function to preprocess the uploaded image
+def preprocess_image(image):
+    image = image.convert('L')  # Convert to grayscale
+    image = image.resize((28, 28))  # Resize to MNIST image size
+    image = np.array(image)  # Convert to NumPy array
+    image = image.reshape(1, 28, 28, 1)  # Reshape to the input shape of the model
+    image = image / 255.0  # Normalize the pixel values to [0, 1]
+    return image
+
+# Streamlit web app
+def main():
+    st.title('Handwritten Digit Recognition')
+
+    # Create a file uploader widget
+    uploaded_image = st.file_uploader('Choose an image...', type=['jpg', 'png', 'jpeg'])
+
+    if uploaded_image is not None:
+        # Display the uploaded image
+        st.image(uploaded_image, caption='Uploaded Image', use_column_width=True)
+
+        # Process the uploaded image
+        image = Image.open(uploaded_image)
+        processed_image = preprocess_image(image)
+
+        # Make prediction using the model
+        prediction = model.predict(processed_image)
+        digit = np.argmax(prediction)
+
+        st.write(f'Predicted digit: {digit}')
+
+if __name__ == '__main__':
+    main()
+
 
